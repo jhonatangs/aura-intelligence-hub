@@ -1,0 +1,4 @@
+- UI Frameworks: Use the frontend frameworks and styling libraries exactly as defined in `.ai/context.md` (e.g., React, Vue, Next.js).
+- Language: TypeScript in `strict` mode is mandatory.
+- Modularity: Keep UI components focused and visually cohesive. Extract complex business logic, state management, or API calls into custom hooks or composables to avoid bloated presentation layers. Do not force artificial file splits if it harms readability.
+- Linter & Formatting: Enforce `ESLint` and `Prettier` natively. No unresolved warnings or typing errors are permitted in the final handoff.

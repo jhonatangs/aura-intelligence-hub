@@ -1,0 +1,4 @@
+- Architectural Pattern: Strictly adhere to the data modeling pattern defined in `.ai/context.md` (e.g., Medallion, Data Vault, Kimball, or custom data mesh).
+- SQL Standard: Enforce strict SQL formatting and readability via `sqlfluff`. Always prefer Common Table Expressions (CTEs) over deeply nested subqueries.
+- Orchestration: All pipeline tasks and schedules must be strictly idempotent. Keep the orchestrator logic lightweight by delegating heavy data transformations to the dedicated processing engines or data warehouses.
+- Data Quality & Contracts: Ensure data contracts are enforced. The final consumption layers (e.g., presentation tables, analytical views, or materialized nodes) MUST include automated quality tests for cardinality, null values, and uniqueness, regardless of the specific validation framework being used.

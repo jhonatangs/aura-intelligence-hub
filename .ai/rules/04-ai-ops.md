@@ -1,0 +1,4 @@
+- Architecture & Frameworks: Strictly adhere to the AI frameworks and agentic architectures specified in `.ai/context.md` (e.g., CrewAI, LangGraph, standard LangChain, or custom implementations).
+- Validation: The output of any LLM MUST be strictly parsed and validated using structured outputs (e.g., Pydantic) before proceeding in the pipeline to ensure determinism and prevent downstream errors.
+- Observability: Every agent, chain, or RAG node must allow dependency injection for tracing and evaluation, regardless of the specific LLMOps platform being used.
+- RAG Architecture: Strictly isolate the embedding/ingestion logic from the retrieval/generation logic. Maintain clear modular boundaries between vector stores and LLM calls.

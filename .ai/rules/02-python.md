@@ -1,0 +1,4 @@
+- Standard: Strict type hints are mandatory (`mypy` compliant).
+- Linter & Formatting: Use `ruff` for all linting and formatting. Ensure autonomous compliance before handoff.
+- Paradigms: Prefer pure functions. Do not use classes unless state management is strictly necessary.
+- Documentation: Use Google-style docstrings for all public functions and classes.

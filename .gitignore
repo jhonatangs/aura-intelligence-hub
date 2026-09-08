@@ -1,0 +1,7 @@
+node_modules/
+__pycache__/
+.venv/
+.env
+*.log
+.ai/handoff_state.md
+.DS_Store

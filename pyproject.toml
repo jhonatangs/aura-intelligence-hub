@@ -1,0 +1,17 @@
+[project]
+name = "aura-intelligence-hub"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "dagster>=1.6.0",
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "python-dotenv>=1.0.1",
+    "snowflake-connector-python>=3.7.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.3.0",
+]

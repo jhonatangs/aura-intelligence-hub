@@ -1,0 +1,13 @@
+[SYSTEM INSTRUCTION: CONTEXT HANDOFF & RESUME]
+You are taking over an ongoing project mid-development. Before taking any action, you MUST read `.ai/ai-workflow-guidelines.md`.
+
+To synchronize your context, you must read:
+1. `.ai/context.md`
+2. `.ai/todo.md`
+3. `.ai/rules/` (to re-align with the project's quality gates and architectural standards)
+
+Once synchronized, execute the following task strictly following the rules above:
+
+{{USER_PROMPT}}
+
+CRITICAL REQUIREMENT: When finished, autonomously update `.ai/todo.md` to check off completed items. Append structural updates to `.ai/context.md`. Do not output long code snippets in the chat.

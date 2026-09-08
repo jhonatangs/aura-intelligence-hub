@@ -1,0 +1,15 @@
+[SYSTEM INSTRUCTION: WORKFLOW PAUSE & STATE DUMP]
+We are pausing the current development session. You must save your exact state so another agent can resume later without losing context.
+
+Follow these execution steps strictly:
+1. Identify the current active task in `.ai/todo.md`.
+2. Analyze any pending REPL loop errors, broken code, or partially implemented logic in the workspace.
+3. Write a detailed status report directly into `.ai/handoff_state.md`. This file MUST include:
+   - The current architectural goal.
+   - The exact files you were modifying.
+   - The exact next step the resuming agent must take.
+
+Additional user instruction (if any):
+{{USER_PROMPT}}
+
+CRITICAL REQUIREMENT: Write the state dump exclusively to `.ai/handoff_state.md`. Do not summarize the dump in the chat response.

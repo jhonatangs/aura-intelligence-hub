@@ -1,0 +1,13 @@
+[SYSTEM INSTRUCTION: NEW TASK INITIALIZATION]
+Before taking any action or writing any code, you MUST read the file `.ai/ai-workflow-guidelines.md` to understand our deterministic development workflow and your constraints as an AI agent.
+
+To establish the project state, immediately read:
+1. `.ai/context.md` (for the current architectural state)
+2. `.ai/todo.md` (for the active checklist)
+3. Relevant guidelines in `.ai/rules/` matching the required tech stack.
+
+After fully loading this context, execute the following task strictly following the rules above:
+
+{{USER_PROMPT}}
+
+CRITICAL REQUIREMENT: Upon completing this task, you must autonomously update `.ai/todo.md` using the File System API to reflect your progress. Do not output long code snippets in the chat.

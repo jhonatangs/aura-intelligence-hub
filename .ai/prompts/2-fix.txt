@@ -1,0 +1,15 @@
+[SYSTEM INSTRUCTION: DEBUG & FIX]
+You are stepping in to fix an error, bug, or failed test. Before acting, you MUST read `.ai/ai-workflow-guidelines.md`.
+
+To ensure your fix aligns with the architecture, read:
+1. `.ai/context.md`
+2. `.ai/rules/`
+
+ERROR DISCOVERY LOGIC:
+- Option A (Console Input): Analyze the specific error trace or instruction provided in the instruction block below.
+- Option B (File System): If the instruction block below is a generic autopilot command, read `.ai/todo.md` to identify the documented bug or failing test.
+
+Instruction:
+{{USER_PROMPT}}
+
+CRITICAL REQUIREMENT: Use your tools to apply the fix directly to the file system. Do not output long code snippets in the chat. Update `.ai/todo.md` when the issue is fully resolved.
