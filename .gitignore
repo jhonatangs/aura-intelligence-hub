@@ -5,3 +5,11 @@ __pycache__/
 *.log
 .ai/handoff_state.md
 .DS_Store
+
+# Cryptographic Keys and Certificates
+*.p8
+*.pub
+*.pem
+*.key
+*.crt
+*.der
