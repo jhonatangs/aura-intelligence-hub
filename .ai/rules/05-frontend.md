@@ -1,4 +1,12 @@
-- UI Frameworks: Use the frontend frameworks and styling libraries exactly as defined in `.ai/context.md` (e.g., React, Vue, Next.js).
-- Language: TypeScript in `strict` mode is mandatory.
-- Modularity: Keep UI components focused and visually cohesive. Extract complex business logic, state management, or API calls into custom hooks or composables to avoid bloated presentation layers. Do not force artificial file splits if it harms readability.
-- Linter & Formatting: Enforce `ESLint` and `Prettier` natively. No unresolved warnings or typing errors are permitted in the final handoff.
+# 💻 Frontend, Visualization & BI Dashboard Rules
+
+- **Framework & Stack**:
+  - Web dashboards and competitive analytics UIs must follow modern modular architecture (e.g., Next.js with React or Streamlit for analytics prototypes as defined in `.ai/context.md`).
+- **Typing & Strictness**:
+  - TypeScript in `strict` mode is mandatory for JavaScript/TypeScript frontend codebases. No untyped `any` escape hatches.
+  - Python-based UI prototypes (e.g., Streamlit) must follow `02-python.md` type hinting and lint standards.
+- **Modularity & Architecture**:
+  - Isolate presentation components from state management, data-fetching layers, and API clients.
+  - Reusable components must reside in dedicated UI folders with deterministic test specs.
+- **Linting & Code Quality**:
+  - Enforce ESLint, Prettier, and zero console/build warnings before code delivery.
