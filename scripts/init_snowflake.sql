@@ -136,4 +136,157 @@ CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.SILVER.PARTNER_INVENTORY (
 )
 COMMENT = 'Cleansed and deduplicated partner inventory balances by warehouse location and snapshot date';
 
+-- Gold Dimension Table: Calendar Date Dimension
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.GOLD.DIM_DATE (
+    date_key NUMBER(8, 0) NOT NULL,
+    calendar_date DATE NOT NULL,
+    year NUMBER(4, 0) NOT NULL,
+    quarter NUMBER(1, 0) NOT NULL,
+    month NUMBER(2, 0) NOT NULL,
+    month_name VARCHAR(20) NOT NULL,
+    day_of_month NUMBER(2, 0) NOT NULL,
+    day_of_week NUMBER(1, 0) NOT NULL,
+    day_name VARCHAR(20) NOT NULL,
+    is_weekend BOOLEAN NOT NULL,
+    is_holiday BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (date_key)
+)
+COMMENT = 'Gold calendar date dimension with day/month/quarter/weekend attributes';
+
+-- Gold Dimension Table: Commercial Partners / Distributors
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.GOLD.DIM_PARTNERS (
+    partner_key VARCHAR(32) NOT NULL,
+    partner_id VARCHAR(100) NOT NULL,
+    partner_cnpj VARCHAR(20),
+    partner_name VARCHAR(255),
+    channel_type VARCHAR(50) DEFAULT 'DISTRIBUTOR',
+    first_seen_date DATE,
+    last_active_date DATE,
+    is_active BOOLEAN DEFAULT TRUE,
+    transformed_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (partner_key)
+)
+COMMENT = 'Gold conformed dimension for distributors and partner accounts';
+
+-- Gold Dimension Table: Product SKUs
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.GOLD.DIM_SKUS (
+    sku_key VARCHAR(32) NOT NULL,
+    sku VARCHAR(100) NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    flavor VARCHAR(100) NOT NULL,
+    volume_ml NUMBER(10, 0) NOT NULL,
+    package_type VARCHAR(50) NOT NULL,
+    category VARCHAR(50) DEFAULT 'ENERGY_DRINK',
+    transformed_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (sku_key)
+)
+COMMENT = 'Gold dimension mapping product SKUs, volume, flavor, and package specs';
+
+-- Gold Dimension Table: Logistics Distribution Hubs
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.GOLD.DIM_HUBS (
+    hub_key VARCHAR(32) NOT NULL,
+    hub_id VARCHAR(100) NOT NULL,
+    hub_name VARCHAR(255) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(10) NOT NULL,
+    latitude NUMBER(10, 6) NOT NULL,
+    longitude NUMBER(10, 6) NOT NULL,
+    timezone VARCHAR(50) NOT NULL,
+    transformed_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (hub_key)
+)
+COMMENT = 'Gold dimension for regional logistics hubs and distribution centers';
+
+-- Gold Fact Table: B2B Partner Sell-Out Transactions
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.GOLD.FACT_SELLOUT (
+    sellout_key VARCHAR(32) NOT NULL,
+    date_key NUMBER(8, 0) NOT NULL,
+    partner_key VARCHAR(32) NOT NULL,
+    sku_key VARCHAR(32) NOT NULL,
+    invoice_number VARCHAR(100) NOT NULL,
+    batch_number VARCHAR(100) NOT NULL,
+    quantity_sold NUMBER(10, 0) NOT NULL,
+    unit_price NUMBER(12, 2) NOT NULL,
+    total_price NUMBER(12, 2) NOT NULL,
+    tax_amount NUMBER(12, 2) NOT NULL,
+    net_revenue NUMBER(12, 2) NOT NULL,
+    transformed_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (sellout_key)
+)
+COMMENT = 'Gold transactional fact recording B2B invoice sell-out volumes, revenues, and taxes';
+
+-- Gold Fact Table: Partner Warehouse Daily Inventory Snapshots
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.GOLD.FACT_INVENTORY_SNAPSHOT (
+    snapshot_key VARCHAR(32) NOT NULL,
+    date_key NUMBER(8, 0) NOT NULL,
+    partner_key VARCHAR(32) NOT NULL,
+    sku_key VARCHAR(32) NOT NULL,
+    batch_id VARCHAR(100) NOT NULL,
+    warehouse_location VARCHAR(100) NOT NULL,
+    stock_quantity NUMBER(10, 0) NOT NULL,
+    snapshot_date DATE NOT NULL,
+    transformed_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (snapshot_key)
+)
+COMMENT = 'Gold periodic snapshot fact tracking partner warehouse stock levels';
+
+-- Gold Fact Table: Competitor Pricing & Market Intelligence
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.GOLD.FACT_COMPETITOR_PRICING (
+    pricing_key VARCHAR(32) NOT NULL,
+    date_key NUMBER(8, 0) NOT NULL,
+    competitor_brand VARCHAR(50) NOT NULL,
+    product_title VARCHAR(255) NOT NULL,
+    volume_ml NUMBER(10, 0) NOT NULL,
+    price_brl NUMBER(10, 2) NOT NULL,
+    price_per_ml NUMBER(10, 4) NOT NULL,
+    stock_status VARCHAR(20) NOT NULL,
+    is_in_stock BOOLEAN NOT NULL,
+    observed_at TIMESTAMP_NTZ NOT NULL,
+    source_url VARCHAR(500) NOT NULL,
+    transformed_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (pricing_key)
+)
+COMMENT = 'Gold fact tracking competitor retail price points and availability metrics';
+
+-- Gold Analytical View: Market Intelligence & Sell-Out Audit
+CREATE OR REPLACE VIEW AURA_LAKEHOUSE.GOLD.V_MARKET_INTELLIGENCE_AUDIT AS
+SELECT
+    d.calendar_date,
+    d.year,
+    d.quarter,
+    d.month,
+    d.month_name,
+    p.partner_id,
+    p.partner_name,
+    p.channel_type,
+    s.sku,
+    s.product_name,
+    s.flavor,
+    s.volume_ml AS aura_volume_ml,
+    fso.invoice_number,
+    fso.batch_number,
+    fso.quantity_sold,
+    fso.unit_price,
+    fso.total_price,
+    fso.tax_amount,
+    fso.net_revenue,
+    ROUND(fso.unit_price / NULLIF(s.volume_ml, 0), 4) AS aura_price_per_ml,
+    inv.stock_quantity AS partner_inventory_stock,
+    w.city_hub AS climatic_hub,
+    w.temp_max AS regional_temp_max,
+    w.temp_min AS regional_temp_min,
+    w.precipitation_sum AS regional_precipitation_sum
+FROM AURA_LAKEHOUSE.GOLD.FACT_SELLOUT fso
+JOIN AURA_LAKEHOUSE.GOLD.DIM_DATE d ON fso.date_key = d.date_key
+JOIN AURA_LAKEHOUSE.GOLD.DIM_PARTNERS p ON fso.partner_key = p.partner_key
+JOIN AURA_LAKEHOUSE.GOLD.DIM_SKUS s ON fso.sku_key = s.sku_key
+LEFT JOIN AURA_LAKEHOUSE.GOLD.FACT_INVENTORY_SNAPSHOT inv
+    ON fso.date_key = inv.date_key
+    AND fso.partner_key = inv.partner_key
+    AND fso.sku_key = inv.sku_key
+    AND fso.batch_number = inv.batch_id
+LEFT JOIN AURA_LAKEHOUSE.SILVER.WEATHER_METRICS w
+    ON d.calendar_date = w.metric_date;
+
+
 

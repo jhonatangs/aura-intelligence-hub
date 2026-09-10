@@ -92,3 +92,26 @@ Use this file to guide the autonomous agent. The agent must change the status fr
 - [x] Task 9: Author unit tests in `tests/test_silver_assets.py` validating Dagster asset dependency graph and materialization logic via `build_asset_context`.
 - [x] Task 10: Author unit tests in `tests/test_run_silver_transforms.py` validating CLI argument parsing and error logging.
 - [x] Task 11: Execute quality verification suite (`uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -v`), ensuring all existing and new tests pass green.
+
+# Sprint 5: Gold Layer Dimensional Modeling (Kimball Star Schema) & Analytical Marts
+
+- [x] Task 1: Update `scripts/init_snowflake.sql` with DDL for Gold dimensions (`DIM_DATE`, `DIM_PARTNERS`, `DIM_SKUS`, `DIM_HUBS`), facts (`FACT_SELLOUT`, `FACT_INVENTORY_SNAPSHOT`, `FACT_COMPETITOR_PRICING`), and the analytical view `V_MARKET_INTELLIGENCE_AUDIT`, then execute `scripts/bootstrap_snowflake.py`.
+- [x] Task 2: Implement SQL dimensional transform query builders in `src/transformation/sql/gold_transforms.py`:
+  - `build_dim_date_sql()`: Deterministic date dimension generator using calendar sequences.
+  - `build_dim_partners_sql()`: Extracts distinct partners from `SILVER.INVOICES` and `SILVER.PARTNER_INVENTORY` with `MD5(partner_id)` surrogate key.
+  - `build_dim_skus_sql()`: Maps SKUs (`AURA_250ML`, `AURA_ZERO_250ML`, `AURA_TROPICAL_473ML`) with volume and flavor attributes.
+  - `build_dim_hubs_sql()`: Populates distribution hubs with coordinates and surrogate keys.
+  - `build_fact_sellout_sql()`: Denormalizes `SILVER.INVOICES` and `SILVER.INVOICE_ITEMS`, joins with dimensions to resolve foreign surrogate keys.
+  - `build_fact_inventory_snapshot_sql()`: Resolves partner, sku, and date keys from `SILVER.PARTNER_INVENTORY`.
+  - `build_fact_competitor_pricing_sql()`: Computes `price_per_ml` and normalizes stock status flags.
+- [x] Task 3: Implement Gold transformation service in `src/transformation/services/gold_service.py` with methods to execute dimensional merges in proper dependency order (Dimensions first, then Facts) using `SnowflakeClient`.
+- [x] Task 4: Implement Dagster Gold Software-Defined Assets (SDAs) in `src/orchestration/assets/gold.py`:
+  - Declare `@asset` for dimensions: `gold_dim_date`, `gold_dim_partners`, `gold_dim_skus`, `gold_dim_hubs`.
+  - Declare `@asset` for facts with dependencies on Silver tables and Gold dimensions: `gold_fact_sellout`, `gold_fact_inventory_snapshot`, `gold_fact_competitor_pricing`.
+  - Register assets in `src/orchestration/definitions.py`.
+- [x] Task 5: Extend CLI pipeline runner at `src/transformation/pipelines/run_gold_transforms.py` supporting `--target` (`dimensions`, `facts`, `all`) and `--dry-run`.
+- [x] Task 6: Author unit tests in `tests/test_gold_transforms_sql.py` verifying SQL generation, surrogate key hash formulas, date math, and join clauses.
+- [x] Task 7: Author unit tests in `tests/test_gold_service.py` mocking `SnowflakeClient` to verify dimensional load sequence and error handling.
+- [x] Task 8: Author unit tests in `tests/test_gold_assets.py` verifying Dagster asset dependencies, upstream lineage, and schema metadata.
+- [x] Task 9: Author unit tests in `tests/test_run_gold_transforms.py` validating CLI arguments and execution logs.
+- [x] Task 10: Run full repository quality verification (`uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -v`) ensuring zero regressions and all tests pass green.

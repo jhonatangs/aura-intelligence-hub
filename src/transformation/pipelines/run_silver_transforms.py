@@ -11,9 +11,15 @@ import argparse
 import logging
 import sys
 from collections.abc import Sequence
+from pathlib import Path
 
-from src.transformation.services.silver_service import SilverTransformationService
-from src.transformation.sql.silver_transforms import (
+# Ensure project root is on sys.path for direct CLI execution
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.transformation.services.silver_service import SilverTransformationService  # noqa: E402
+from src.transformation.sql.silver_transforms import (  # noqa: E402
     build_merge_competitor_prices_sql,
     build_merge_invoice_items_sql,
     build_merge_invoices_sql,

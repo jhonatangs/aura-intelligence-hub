@@ -8,13 +8,12 @@ import logging
 import sys
 from pathlib import Path
 
-# Ensure src/ is on sys.path for direct script execution
+# Ensure project root is on sys.path for direct script execution
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-SRC_PATH = PROJECT_ROOT / "src"
-if str(SRC_PATH) not in sys.path:
-    sys.path.insert(0, str(SRC_PATH))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-from common.snowflake_client import SnowflakeClient  # noqa: E402
+from src.common.snowflake_client import SnowflakeClient  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
