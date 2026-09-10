@@ -15,7 +15,7 @@ from cryptography.hazmat.primitives import serialization
 from snowflake.connector import SnowflakeConnection, connect
 from snowflake.connector.cursor import SnowflakeCursor
 
-from common.config import SnowflakeSettings, get_settings
+from src.common.config import SnowflakeSettings, get_settings
 
 
 def load_private_key(private_key_path: Path, passphrase: str | None = None) -> bytes:

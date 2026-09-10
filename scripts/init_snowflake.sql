@@ -33,3 +33,32 @@ CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.BRONZE.INVOICES_RAW (
     payload VARIANT NOT NULL
 )
 COMMENT = 'Raw B2B partner invoice JSON payloads parsed via LangGraph with ingestion metadata';
+
+-- Bronze Ingestion Table: Competitor Pricing Intelligence
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.BRONZE.COMPETITOR_PRICES_RAW (
+    source_url VARCHAR(500) NOT NULL,
+    competitor_brand VARCHAR(50) NOT NULL,
+    ingested_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    payload VARIANT NOT NULL
+)
+COMMENT = 'Raw competitor pricing intelligence scraped from e-commerce and retail channels';
+
+-- Bronze Ingestion Table: Macro Climatic Context
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.BRONZE.WEATHER_METRICS_RAW (
+    city_hub VARCHAR(100) NOT NULL,
+    state VARCHAR(10) NOT NULL,
+    ingested_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    payload VARIANT NOT NULL
+)
+COMMENT = 'Raw Open-Meteo macro climatic metrics for regional distribution hubs';
+
+-- Bronze Ingestion Table: Legacy Partner Warehouse Inventories
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.BRONZE.PARTNER_INVENTORY_RAW (
+    source_file VARCHAR(500) NOT NULL,
+    partner_id VARCHAR(100) NOT NULL,
+    file_hash_md5 VARCHAR(32) NOT NULL,
+    ingested_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    payload VARIANT NOT NULL
+)
+COMMENT = 'Raw partner warehouse inventory snapshots parsed from legacy delimited tabular extracts';
+

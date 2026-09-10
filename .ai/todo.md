@@ -43,3 +43,30 @@ Use this file to guide the autonomous agent. The agent must change the status fr
 - [x] Task 10: Author unit tests in `tests/test_invoice_graph.py` mocking the LLM provider to test the cyclic self-correction loop, recovery on simulated parse failure, and successful termination.
 - [x] Task 11: Author unit tests in `tests/test_bronze_invoice_repo.py` mocking `SnowflakeClient` to verify idempotent inserts, correct JSON parameter binding, and metadata attribution (`source_file`, `partner_id`).
 - [x] Task 12: Run quality verification suite (`uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -v`) confirming zero regressions and 100% green tests.
+
+# Sprint 3: Multimodal Ingestion (Competitor Scraper, Open-Meteo Client, Legacy Inventory & Bronze Dagster SDAs)
+
+- [x] Task 1: Update dependencies in `pyproject.toml` via `uv add` for `httpx`, `beautifulsoup4`, and `tenacity`.
+- [x] Task 2: Update `scripts/init_snowflake.sql` and run `scripts/bootstrap_snowflake.py` to provision tables `BRONZE.COMPETITOR_PRICES_RAW`, `BRONZE.WEATHER_METRICS_RAW`, and `BRONZE.PARTNER_INVENTORY_RAW`.
+- [x] Task 3: Implement dynamic logistics hubs registry in `src/ingestion/config/hubs.py` defining coordinates and metadata for multi-region distribution centers (SP, RJ, BH, Curitiba, Porto Alegre, Salvador, Recife, Fortaleza, Goiânia, Cuiabá).
+- [x] Task 4: Implement domain contracts in `src/ingestion/models/multimodal.py` with Pydantic v2:
+  - `CompetitorPriceRecord`: competitor brand (`RED_BULL`, `MONSTER`), product title, volume ml, price in BRL, stock status, timestamp.
+  - `WeatherMetricRecord`: city hub, state, date, temp_max, temp_min, precipitation_sum.
+  - `PartnerInventoryRecord`: partner_id, sku, batch_id, stock_quantity, warehouse_location, snapshot_date.
+- [x] Task 5: Implement resilient Open-Meteo REST API client in `src/ingestion/clients/weather_client.py` using `httpx` with `tenacity` retry, iterating dynamically through all configured distribution hubs.
+- [x] Task 6: Implement competitor price scraper at `src/ingestion/scrapers/competitor_scraper.py` using async `httpx` and `BeautifulSoup` to extract Red Bull and Monster prices, packaging structured records with resilience against connection drops and parsing errors.
+- [x] Task 7: Implement legacy tabular inventory ingestor at `src/ingestion/parsers/tabular_inventory.py` supporting auto-detection of delimiters (`;`, `,`, `|`), encoding fallback (`utf-8`, `latin1`), MD5 file hashing, and normalization into Pydantic models.
+- [x] Task 8: Implement Bronze repositories:
+  - `BronzeCompetitorPriceRepository` in `src/ingestion/repositories/bronze_competitor_repo.py` targeting `BRONZE.COMPETITOR_PRICES_RAW`.
+  - `BronzeWeatherRepository` in `src/ingestion/repositories/bronze_weather_repo.py` targeting `BRONZE.WEATHER_METRICS_RAW`.
+  - `BronzePartnerInventoryRepository` in `src/ingestion/repositories/bronze_inventory_repo.py` targeting `BRONZE.PARTNER_INVENTORY_RAW`.
+- [x] Task 9: Implement Dagster Software-Defined Assets (SDAs) in `src/orchestration/assets/bronze.py`:
+  - Declare `@asset` definitions for `bronze_invoices_raw`, `bronze_weather_metrics_raw`, `bronze_competitor_prices_raw`, and `bronze_partner_inventory_raw` exposing asset keys, descriptions, and lineage metadata.
+  - Register asset definitions in `src/orchestration/definitions.py`.
+- [x] Task 10: Build lightweight ad-hoc CLI runner at `src/ingestion/pipelines/run_multimodal_ingestion.py` for local debugging and manual backfills with `--source` and `--dry-run` switches.
+- [x] Task 11: Author unit tests in `tests/test_weather_client.py` mocking `httpx` responses across multiple distribution hubs and asserting retry behavior on HTTP 5xx.
+- [x] Task 12: Author unit tests in `tests/test_competitor_scraper.py` mocking HTML responses to test price parsing, currency parsing, and stock detection.
+- [x] Task 13: Author unit tests in `tests/test_tabular_inventory.py` validating CSV, semicolon, and pipe-delimited files, invalid rows rejection, and MD5 file hash calculations.
+- [x] Task 14: Author unit tests in `tests/test_bronze_multimodal_repos.py` verifying parameterized inserts and `PARSE_JSON` bindings across the three new Bronze repositories with a mocked `SnowflakeClient`.
+- [x] Task 15: Author unit tests in `tests/test_bronze_assets.py` validating Dagster asset materialization and context mocking.
+- [x] Task 16: Execute full repository validation gates (`uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -v`), ensuring 100% green tests with zero regressions.
