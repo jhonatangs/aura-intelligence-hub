@@ -70,7 +70,7 @@ def test_asset_checks_registration() -> None:
 
 def test_lakehouse_e2e_job_selection() -> None:
     """Verify lakehouse_e2e_job selects all 16 assets across bronze, silver, and gold."""
-    job_def = defs.get_job_def("lakehouse_e2e_job")
+    job_def = defs.resolve_job_def("lakehouse_e2e_job")
     selected_keys = {key.path[-1] for key in job_def.asset_layer.selected_asset_keys}
 
     assert len(selected_keys) == 16
@@ -81,7 +81,7 @@ def test_lakehouse_e2e_job_selection() -> None:
 
 def test_intraday_market_intelligence_job_selection() -> None:
     """Verify intraday_market_intelligence_job targets only competitor and weather assets."""
-    job_def = defs.get_job_def("intraday_market_intelligence_job")
+    job_def = defs.resolve_job_def("intraday_market_intelligence_job")
     selected_keys = {key.path[-1] for key in job_def.asset_layer.selected_asset_keys}
 
     expected_intraday = {
@@ -115,7 +115,7 @@ def test_schedule_definitions() -> None:
 
 def test_no_circular_dependencies_in_dag() -> None:
     """Assert absence of circular dependencies in the full asset dependency graph."""
-    job_def = defs.get_job_def("lakehouse_e2e_job")
+    job_def = defs.resolve_job_def("lakehouse_e2e_job")
     toposorted = [key.path[-1] for key in job_def.asset_layer.asset_graph.toposorted_asset_keys]
 
     assert len(toposorted) == 16
