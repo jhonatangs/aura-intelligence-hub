@@ -5,9 +5,9 @@ Registers software-defined assets, schedules, and resources for the lakehouse pl
 
 from dagster import Definitions, load_assets_from_modules
 
-from src.orchestration.assets import bronze
+from src.orchestration.assets import bronze, silver
 
-all_assets = load_assets_from_modules([bronze])
+all_assets = load_assets_from_modules([bronze, silver])
 
 defs = Definitions(
     assets=all_assets,

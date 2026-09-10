@@ -62,3 +62,78 @@ CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.BRONZE.PARTNER_INVENTORY_RAW (
 )
 COMMENT = 'Raw partner warehouse inventory snapshots parsed from legacy delimited tabular extracts';
 
+-- Silver Conformed Table: Partner B2B Invoices (Header Grain)
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.SILVER.INVOICES (
+    invoice_number VARCHAR(100) NOT NULL,
+    partner_id VARCHAR(100) NOT NULL,
+    partner_cnpj VARCHAR(20) NOT NULL,
+    issue_date DATE NOT NULL,
+    subtotal NUMBER(12, 2) NOT NULL,
+    tax_amount NUMBER(12, 2) NOT NULL,
+    total_amount NUMBER(12, 2) NOT NULL,
+    source_file VARCHAR(500) NOT NULL,
+    ingested_at TIMESTAMP_NTZ NOT NULL,
+    transformed_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (invoice_number, partner_id)
+)
+COMMENT = 'Cleansed and deduplicated partner B2B invoice header records';
+
+-- Silver Conformed Table: Partner B2B Invoice Line Items
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.SILVER.INVOICE_ITEMS (
+    invoice_number VARCHAR(100) NOT NULL,
+    partner_id VARCHAR(100) NOT NULL,
+    sku VARCHAR(100) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    quantity NUMBER(10, 0) NOT NULL,
+    unit_price NUMBER(12, 2) NOT NULL,
+    total_price NUMBER(12, 2) NOT NULL,
+    batch_number VARCHAR(100) NOT NULL,
+    source_file VARCHAR(500) NOT NULL,
+    transformed_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (invoice_number, partner_id, sku, batch_number)
+)
+COMMENT = 'Normalized and flattened partner B2B invoice line items';
+
+-- Silver Conformed Table: Competitor Pricing Intelligence
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.SILVER.COMPETITOR_PRICES (
+    competitor_brand VARCHAR(50) NOT NULL,
+    product_title VARCHAR(255) NOT NULL,
+    volume_ml NUMBER(10, 0) NOT NULL,
+    price_brl NUMBER(10, 2) NOT NULL,
+    stock_status VARCHAR(20) NOT NULL,
+    observed_at TIMESTAMP_NTZ NOT NULL,
+    source_url VARCHAR(500) NOT NULL,
+    transformed_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (competitor_brand, product_title, observed_at)
+)
+COMMENT = 'Cleansed and deduplicated competitor price observations for Red Bull and Monster';
+
+-- Silver Conformed Table: Macro Climatic Observations
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.SILVER.WEATHER_METRICS (
+    city_hub VARCHAR(100) NOT NULL,
+    state VARCHAR(10) NOT NULL,
+    metric_date DATE NOT NULL,
+    temp_max NUMBER(5, 2) NOT NULL,
+    temp_min NUMBER(5, 2) NOT NULL,
+    precipitation_sum NUMBER(7, 2) NOT NULL,
+    transformed_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (city_hub, metric_date)
+)
+COMMENT = 'Normalized daily temperature and precipitation observations per logistics distribution hub';
+
+-- Silver Conformed Table: Legacy Partner Warehouse Inventories
+CREATE TABLE IF NOT EXISTS AURA_LAKEHOUSE.SILVER.PARTNER_INVENTORY (
+    partner_id VARCHAR(100) NOT NULL,
+    sku VARCHAR(100) NOT NULL,
+    batch_id VARCHAR(100) NOT NULL,
+    stock_quantity NUMBER(10, 0) NOT NULL,
+    warehouse_location VARCHAR(100) NOT NULL,
+    snapshot_date DATE NOT NULL,
+    file_hash_md5 VARCHAR(32) NOT NULL,
+    source_file VARCHAR(500) NOT NULL,
+    transformed_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (partner_id, sku, batch_id, warehouse_location, snapshot_date)
+)
+COMMENT = 'Cleansed and deduplicated partner inventory balances by warehouse location and snapshot date';
+
+

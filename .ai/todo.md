@@ -70,3 +70,25 @@ Use this file to guide the autonomous agent. The agent must change the status fr
 - [x] Task 14: Author unit tests in `tests/test_bronze_multimodal_repos.py` verifying parameterized inserts and `PARSE_JSON` bindings across the three new Bronze repositories with a mocked `SnowflakeClient`.
 - [x] Task 15: Author unit tests in `tests/test_bronze_assets.py` validating Dagster asset materialization and context mocking.
 - [x] Task 16: Execute full repository validation gates (`uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -v`), ensuring 100% green tests with zero regressions.
+
+# Sprint 4: Silver Layer Normalization, Deduplication & Push-Down SQL Transformations
+
+- [x] Task 1: Update `scripts/init_snowflake.sql` with DDL for Silver tables (`INVOICES`, `INVOICE_ITEMS`, `COMPETITOR_PRICES`, `WEATHER_METRICS`, `PARTNER_INVENTORY`) and run `scripts/bootstrap_snowflake.py` to apply changes.
+- [x] Task 2: Implement SQL transform query builder in `src/transformation/sql/silver_transforms.py` generating deterministic, idempotent `MERGE` statements with `QUALIFY ROW_NUMBER()` deduplication for all 5 Silver datasets.
+- [x] Task 3: Implement Silver transformation service at `src/transformation/services/silver_service.py` with methods to execute transformations via `SnowflakeClient`:
+  - `transform_invoices()`: Flattens and normalizes Bronze JSON into `SILVER.INVOICES` and `SILVER.INVOICE_ITEMS`.
+  - `transform_competitor_prices()`: Cleans and deduplicates prices into `SILVER.COMPETITOR_PRICES`.
+  - `transform_weather_metrics()`: Types and deduplicates metrics into `SILVER.WEATHER_METRICS`.
+  - `transform_partner_inventory()`: Normalizes legacy inventory into `SILVER.PARTNER_INVENTORY`.
+- [x] Task 4: Implement Dagster Silver Software-Defined Assets (SDAs) in `src/orchestration/assets/silver.py`:
+  - Define `@asset` for `silver_invoices` and `silver_invoice_items` taking `bronze_invoices_raw` as input.
+  - Define `@asset` for `silver_competitor_prices` taking `bronze_competitor_prices_raw` as input.
+  - Define `@asset` for `silver_weather_metrics` taking `bronze_weather_metrics_raw` as input.
+  - Define `@asset` for `silver_partner_inventory` taking `bronze_partner_inventory_raw` as input.
+- [x] Task 5: Register Silver assets and graph dependencies in `src/orchestration/definitions.py`.
+- [x] Task 6: Build CLI transformation entrypoint at `src/transformation/pipelines/run_silver_transforms.py` supporting `--target` (`all`, `invoices`, `competitors`, `weather`, `inventory`) and `--dry-run` modes.
+- [x] Task 7: Author unit tests in `tests/test_silver_transforms_sql.py` verifying SQL syntax generation, parameter sanitization, and `QUALIFY` logic without connecting to live database.
+- [x] Task 8: Author unit tests in `tests/test_silver_service.py` mocking `SnowflakeClient` to verify query execution order, transaction rollback on failure, and row count reporting.
+- [x] Task 9: Author unit tests in `tests/test_silver_assets.py` validating Dagster asset dependency graph and materialization logic via `build_asset_context`.
+- [x] Task 10: Author unit tests in `tests/test_run_silver_transforms.py` validating CLI argument parsing and error logging.
+- [x] Task 11: Execute quality verification suite (`uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -v`), ensuring all existing and new tests pass green.
