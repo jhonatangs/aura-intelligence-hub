@@ -9,6 +9,8 @@ __pycache__/
 .DS_Store
 data/raw/
 *.db
+.coverage
+htmlcov/
 
 # Cryptographic Keys and Certificates
 *.p8

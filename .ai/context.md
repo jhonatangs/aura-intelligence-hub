@@ -91,7 +91,9 @@ Key objectives:
    - Bronze layer: `src/orchestration/assets/bronze.py` (`bronze_invoices_raw`, `bronze_weather_metrics_raw`, `bronze_competitor_prices_raw`, `bronze_partner_inventory_raw`).
    - Silver layer: `src/orchestration/assets/silver.py` (`silver_invoices`, `silver_invoice_items`, `silver_competitor_prices`, `silver_weather_metrics`, `silver_partner_inventory`).
    - Gold layer: `src/orchestration/assets/gold.py` (`gold_dim_date`, `gold_dim_partners`, `gold_dim_skus`, `gold_dim_hubs`, `gold_fact_sellout`, `gold_fact_inventory_snapshot`, `gold_fact_competitor_pricing`).
-   - Registered definitions in `src/orchestration/definitions.py`.
- - **Quality & Governance**: Strict typing, Ruff formatting/linting (100% compliant), and unit test suites isolated with mocks and fixtures (179 tests passing, 0 live network/db leaks).
-
-
+   - Asset Checks: `src/orchestration/checks/quality_checks.py` (`check_sellout_surrogate_keys_not_null`, `check_sellout_positive_revenue`, `check_inventory_non_negative_balances`, `check_competitor_price_bounds`).
+   - Jobs & Automations: `src/orchestration/jobs.py` (`lakehouse_e2e_job`, `intraday_market_intelligence_job`, `daily_lakehouse_schedule`, `intraday_market_intelligence_schedule` with timezone `America/Sao_Paulo`).
+   - Resources: `src/orchestration/resources.py` (`SnowflakeResource`).
+   - Definitions: `src/orchestration/definitions.py`.
+ - **Quality & Governance**: Strict typing, Ruff formatting/linting (100% compliant), automated CI workflow (`.github/workflows/ci.yml`), and unit/integration test suites isolated with mocks and fixtures (213 tests passing, 88% coverage across `src/`, 0 live network/db leaks).
+ - **E2E CLI Runner**: `scripts/run_e2e_pipeline.py` providing end-to-end execution across all Medallion stages with tabular telemetry reporting.

@@ -115,3 +115,26 @@ Use this file to guide the autonomous agent. The agent must change the status fr
 - [x] Task 8: Author unit tests in `tests/test_gold_assets.py` verifying Dagster asset dependencies, upstream lineage, and schema metadata.
 - [x] Task 9: Author unit tests in `tests/test_run_gold_transforms.py` validating CLI arguments and execution logs.
 - [x] Task 10: Run full repository quality verification (`uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -v`) ensuring zero regressions and all tests pass green.
+
+# Sprint 6: End-to-End Orchestration, Asset Checks, Dagster UI & CI/CD Automation
+
+- [x] Task 1: Define Dagster Asset Checks in `src/orchestration/checks/quality_checks.py`:
+  - `check_sellout_surrogate_keys_not_null`: Asserts zero nulls in `FACT_SELLOUT` surrogate keys (`partner_key`, `sku_key`, `date_key`).
+  - `check_sellout_positive_revenue`: Asserts `total_amount >= 0` across all sell-out transactions.
+  - `check_inventory_non_negative_balances`: Asserts `stock_quantity >= 0` on `FACT_INVENTORY_SNAPSHOT`.
+  - `check_competitor_price_bounds`: Asserts `price_per_ml > 0` on `FACT_COMPETITOR_PRICING`.
+- [x] Task 2: Implement scheduled Jobs and Automations in `src/orchestration/jobs.py`:
+  - `lakehouse_e2e_job`: End-to-end materialization job selecting Bronze, Silver, and Gold asset groups.
+  - `intraday_market_intelligence_job`: Targeted run updating competitor prices, weather metrics, and market audit view.
+  - Configure daily and intraday cron schedules with timezone `America/Sao_Paulo`.
+- [x] Task 3: Consolidate `src/orchestration/definitions.py` binding all assets (Bronze, Silver, Gold), checks, jobs, schedules, and a configured Snowflake resource.
+- [x] Task 4: Create end-to-end integration test runner CLI at `scripts/run_e2e_pipeline.py` allowing manual triggering of the full Medallion pipeline (Bronze Ingestion -> Silver Cleansing -> Gold Modeling) with summary execution telemetry.
+- [x] Task 5: Configure automated CI workflow in `.github/workflows/ci.yml`:
+  - Sets up Python 3.11 with cached `uv`.
+  - Runs `uv run ruff check .` and `uv run ruff format --check .`.
+  - Runs `uv run pytest -v` with coverage enforcement.
+- [x] Task 6: Author unit tests in `tests/test_quality_checks.py` verifying Dagster asset checks against mock data and invalid records.
+- [x] Task 7: Author unit tests in `tests/test_dagster_definitions.py` validating asset registry resolution, schedule definitions, job selection sets, and absence of circular dependencies.
+- [x] Task 8: Author integration tests in `tests/test_e2e_pipeline.py` mocking Snowflake and external HTTP services to verify end-to-end data flow telemetry.
+- [x] Task 9: Execute full test suite and quality gates (`uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -v`), ensuring 100% green tests with zero warnings.
+- [x] Task 10: Generate comprehensive project walkthrough documentation in `README.md` containing architecture diagrams, local Dagster UI startup guide (`uv run dagster dev`), and interview pitch defense talking points.
