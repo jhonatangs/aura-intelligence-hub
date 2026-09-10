@@ -114,6 +114,18 @@ def query_competitor_invalid_price_bounds(cursor: Any, database: str = "AURA_LAK
     return int(row[0]) if row and row[0] is not None else 0
 
 
+def _resolve_database() -> str:
+    """Resolve database name from settings with fallback to default.
+
+    Returns:
+        str: Target Snowflake database name.
+    """
+    try:
+        return get_settings().database
+    except Exception:
+        return "AURA_LAKEHOUSE"
+
+
 # -----------------------------------------------------------------------------
 # Dagster Asset Checks
 # -----------------------------------------------------------------------------
@@ -128,7 +140,7 @@ def check_sellout_surrogate_keys_not_null(
 ) -> AssetCheckResult:
     """Check that all surrogate keys in FACT_SELLOUT are non-null."""
     context.log.info("Executing asset check: check_sellout_surrogate_keys_not_null")
-    db = get_settings().database
+    db = _resolve_database()
     client = SnowflakeClient()
 
     with client.get_cursor() as cursor:
@@ -162,7 +174,7 @@ def check_sellout_positive_revenue(
 ) -> AssetCheckResult:
     """Check that all sell-out transactions in FACT_SELLOUT have non-negative revenue."""
     context.log.info("Executing asset check: check_sellout_positive_revenue")
-    db = get_settings().database
+    db = _resolve_database()
     client = SnowflakeClient()
 
     with client.get_cursor() as cursor:
@@ -196,7 +208,7 @@ def check_inventory_non_negative_balances(
 ) -> AssetCheckResult:
     """Check that warehouse inventory snapshots contain non-negative stock balances."""
     context.log.info("Executing asset check: check_inventory_non_negative_balances")
-    db = get_settings().database
+    db = _resolve_database()
     client = SnowflakeClient()
 
     with client.get_cursor() as cursor:
@@ -233,7 +245,7 @@ def check_competitor_price_bounds(
 ) -> AssetCheckResult:
     """Check that competitor pricing records have valid positive price per milliliter."""
     context.log.info("Executing asset check: check_competitor_price_bounds")
-    db = get_settings().database
+    db = _resolve_database()
     client = SnowflakeClient()
 
     with client.get_cursor() as cursor:
